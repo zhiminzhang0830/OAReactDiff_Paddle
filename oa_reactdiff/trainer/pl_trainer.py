@@ -1,7 +1,5 @@
 import sys
-sys.path.append('/root/ssd3/zhangzhimin04/workspaces_11.6/OAReactDiff_Paddle/utils'
-    )
-import paddle_aux
+from utils import paddle_aux
 import paddle
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path

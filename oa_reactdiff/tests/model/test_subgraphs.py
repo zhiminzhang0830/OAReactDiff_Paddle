@@ -1,7 +1,5 @@
 import sys
-sys.path.append('/root/ssd3/zhangzhimin04/workspaces_11.6/OAReactDiff_Paddle/utils'
-    )
-import paddle_aux
+from utils import paddle_aux
 import paddle
 """Test for subgraph_mask, where the position updates are killed for subgraphs, but not the h and edge updates"""
 import unittest
@@ -14,7 +12,7 @@ EPS = 1e-06
 LARGE_EPS = 0.0001
 theta = 0.9
 alpha = 0.4
->>>>>>pytorch_lightning.seed_everything(1234, workers=True)
+# >>>>>>pytorch_lightning.seed_everything(1234, workers=True)
 
 
 def com(x):

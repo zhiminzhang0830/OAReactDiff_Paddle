@@ -1,7 +1,5 @@
 import sys
-sys.path.append('/root/ssd3/zhangzhimin04/workspaces_11.6/OAReactDiff_Paddle/utils'
-    )
-import paddle_aux
+from utils import paddle_aux
 import paddle
 """Ultility functions used in test cases."""
 egnn_config = dict(in_node_nf=8, in_edge_nf=5, hidden_nf=64, edge_hidden_nf

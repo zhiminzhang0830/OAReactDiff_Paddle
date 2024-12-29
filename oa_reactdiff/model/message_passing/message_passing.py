@@ -1,10 +1,7 @@
 
 
 import sys
-sys.path.append(
-    '/root/ssd3/zhangzhimin04/workspaces_11.6/OAReactDiff_Paddle/utils'
-    )
-import paddle_aux
+from utils import paddle_aux
 import paddle
 from collections import OrderedDict
 from inspect import Parameter

@@ -5,7 +5,7 @@ from typing import List, Optional
 from oa_reactdiff.model import LEFTNet
 from oa_reactdiff.dynamics import EGNNDynamics, Confidence
 from oa_reactdiff.utils import get_n_frag_switch, get_mask_for_frag, get_edges_index
->>>>>>pytorch_lightning.seed_everything(0, workers=True)
+# >>>>>>pytorch_lightning.seed_everything(0, workers=True)
 
 
 def init_weights(m):

@@ -10,7 +10,7 @@ EPS = 1e-08
 TIGHT_EPS = 1e-08
 theta = 0.4
 alpha = 0.9
->>>>>>pytorch_lightning.seed_everything(42, workers=True)
+# >>>>>>pytorch_lightning.seed_everything(42, workers=True)
 
 
 def com(x):

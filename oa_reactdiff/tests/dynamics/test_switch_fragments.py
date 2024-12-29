@@ -5,7 +5,7 @@ from typing import List, Optional
 from oa_reactdiff.model import LEFTNet
 from oa_reactdiff.dynamics import EGNNDynamics
 from oa_reactdiff.utils import get_n_frag_switch, get_mask_for_frag, get_edges_index
->>>>>>pytorch_lightning.seed_everything(0, workers=True)
+# >>>>>>pytorch_lightning.seed_everything(0, workers=True)
 model_config = dict(in_node_nf=8, in_edge_nf=0, hidden_nf=64,
     edge_hidden_nf=3, act_fn='swish', n_layers=6, attention=True,
     out_node_nf=None, tanh=False, coords_range=15.0, norm_constant=1.0,

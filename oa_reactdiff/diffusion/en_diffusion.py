@@ -611,6 +611,10 @@ class EnVariationalDiffusion(paddle.nn.Layer):
         Draw samples from the generative model. Optionally, return intermediate
         states for visualization purposes.
         """
+        # The following code is for precision alignment with torch code
+        # import numpy as np
+        # np.random.seed(42)
+
         timesteps = self.T if timesteps is None else timesteps
         assert 0 < return_frames <= timesteps
         assert timesteps % return_frames == 0
@@ -621,6 +625,7 @@ class EnVariationalDiffusion(paddle.nn.Layer):
         combined_mask = paddle.concat(x=fragments_masks)
         edge_index = get_edges_index(combined_mask, remove_self_edge=True)
         n_frag_switch = get_n_frag_switch(fragments_nodes)
+        # xh_fixed: pos, one-hot, charge
         h0 = [
             _xh_fixed[:, self.pos_dim :].astype(dtype="int64") for _xh_fixed in xh_fixed
         ]
@@ -634,8 +639,9 @@ class EnVariationalDiffusion(paddle.nn.Layer):
             ),
             combined_mask,
         )
-        import pdb;pdb.set_trace()
+        # sample noise
         zt_xh = self.sample_combined_position_feature_noise(masks=fragments_masks)
+        # only noise to position
         if self.pos_only:
             zt_xh = [
                 paddle.concat(

@@ -5,7 +5,7 @@ import paddle_aux
 import paddle
 from typing import List
 import math
-# from torch_scatter import scatter_add, scatter_mean
+import numpy as np
 from oa_reactdiff.model.scatter.scatter import scatter
 
 def remove_mean_batch(x, indices):
@@ -25,6 +25,12 @@ def sample_center_gravity_zero_gaussian_batch(size: List[int], indices:
     List[paddle.Tensor]) ->paddle.Tensor:
     assert len(size) == 2
     x = paddle.randn(shape=size)
+
+    # The following code is for precision alignment with torch code
+    # x = np.random.randn(*size)
+    # x = x.astype('float32')
+    # x = paddle.to_tensor(x)
+
     x_projected = remove_mean_batch(x, paddle.concat(x=indices))
     return x_projected
 
@@ -36,9 +42,13 @@ def sum_except_batch(x, indices, dim_size):
 def cdf_standard_gaussian(x):
     return 0.5 * (1.0 + paddle.erf(x=x / math.sqrt(2)))
 
-
 def sample_gaussian(size, device):
     x = paddle.randn(shape=size)
+
+    # The following code is for precision alignment with torch code
+    # x = np.random.randn(*size)
+    # x = x.astype('float32')
+    # x = paddle.to_tensor(x)
     return x
 
 

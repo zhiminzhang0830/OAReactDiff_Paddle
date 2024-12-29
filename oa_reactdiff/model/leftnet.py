@@ -588,7 +588,7 @@ class LEFTNet(paddle.nn.Layer):
         for center in range(pos.shape[0]):
             if node_mask[center] > -1:
                 continue
-            _connected = _j[paddle.where(_i == center)[0].squeeze()] # >>>>>>
+            _connected = _j[paddle.where(_i == center)[0].squeeze(1)] # >>>>>>
             _connected = paddle.concat(x=[_connected, paddle.to_tensor(data
                 =[center], place=pos.place)])
             node_mask[_connected] = _ind
@@ -669,6 +669,10 @@ class LEFTNet(paddle.nn.Layer):
         x1 = (a - b) / (paddle.sqrt(x=paddle.sum(x=(a - b) ** 2, axis=1).
             unsqueeze(axis=1)) + EPS)
         y1 = paddle.cross(x=a, y=b)
+        
+        # The following code is for precision alignment with torch code
+        # data = np.load('y1.npy')
+        # y1 = paddle.to_tensor(data)
         normy = paddle.sqrt(x=paddle.sum(x=y1 ** 2, axis=1).unsqueeze(axis=1)
             ) + EPS
         y1 = y1 / normy

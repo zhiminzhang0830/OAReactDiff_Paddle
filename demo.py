@@ -2,7 +2,7 @@
 import paddle
 import py3Dmol
 import numpy as np
-
+import os
 from typing import Optional
 from paddle import Tensor
 from oa_reactdiff.model import o3
@@ -307,50 +307,6 @@ print(np.median(rmsds))
 print("Cell 33, Done")
 
 
-# 
-# metrics = []
-# for step in range(100):
-#     representations, res = next(itl)
-
-    
-#     n_samples = representations[0]["size"].shape[0]
-#     fragments_nodes = [repre["size"] for repre in representations]
-#     conditions = paddle.to_tensor(data=[[0] for _ in range(n_samples)], place=device)
-
-#     import pdb;pdb.set_trace()
-#     # new_order_react = paddle.randperm(n=representations[0]["size"].item())
-
-#     # for k in ["pos", "one_hot", "charge"]:
-#     #     representations[0][k] = representations[0][k][new_order_react]
-#     xh_fixed = [
-#         paddle.concat(
-#             x=[repre[feature_type].cast(paddle.get_default_dtype()) for feature_type in FEATURE_MAPPING],
-#             axis=1,
-#         )
-#         for repre in representations
-#     ]
-#     out_samples, out_masks = ddpm_trainer.ddpm.inpaint(
-#         n_samples=n_samples,
-#         fragments_nodes=fragments_nodes,
-#         conditions=conditions,
-#         return_frames=1,
-#         resamplings=5,
-#         jump_length=5,
-#         timesteps=None,
-#         xh_fixed=xh_fixed,
-#         frag_fixed=[0, 2],
-#     )
-#     rmsds = batch_rmsd(fragments_nodes, out_samples[0], xh_fixed, idx=1)
-
-#     rmsds = [min(1, _x) for _x in rmsds]
-#     print([(ii, round(rmsd, 2)) for ii, rmsd in enumerate(rmsds)])
-#     print(np.mean(rmsds))
-#     print(np.median(rmsds))
-#     metrics.append(np.mean(rmsds))
-#     print(f'step {step} metrics:', np.mean(metrics))
-
-# print('metrics:', np.mean(metrics))
-
 from glob import glob
 import plotly.express as px
 from oa_reactdiff.analyze.rmsd import xyz2pmg, pymatgen_rmsd
@@ -440,6 +396,7 @@ cluster_dict = OrderedDict(sorted(cluster_dict.items()))
 cluster_dict
 print('Cell 42, Done')
 xyz_path = './demo/CNOH/'
+os.makedirs(xyz_path, exist_ok=True)
 n_samples = 128
 natm = 4
 fragments_nodes = [paddle.to_tensor(data=[natm] * n_samples, place=device),
@@ -458,10 +415,15 @@ write_tmp_xyz(fragments_nodes, out_samples[0], idx=[0, 1, 2], ex_ind=0,
 idx = 10
 assert idx < n_samples
 views = draw_reaction(xyz_path, idx)
-views
+
+try:
+    from openbabel import pybel
+except:
+    print('Since openbabel is not installed, we cannot execute the following code')
+    exit()
+
 from glob import glob
 from pymatgen.io.xyz import XYZ
-from openbabel import pybel
 from oa_reactdiff.analyze.rmsd import pymatgen_rmsd
 
 

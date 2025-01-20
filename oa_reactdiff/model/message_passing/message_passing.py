@@ -6,12 +6,12 @@ import paddle
 from collections import OrderedDict
 from inspect import Parameter
 from typing import Callable, List, Optional, Set
-from torch_scatter import gather_csr, segment_csr
+# from torch_scatter import gather_csr, segment_csr
 from ..scatter.scatter import scatter
-from torch_sparse import SparseTensor
+# from torch_sparse import SparseTensor
 from typing import List, Optional, Tuple, Union
 from .inspector import Inspector
-Adj = Union[paddle.Tensor, SparseTensor]
+Adj = Union[paddle.Tensor, paddle.Tensor]
 Size = Optional[Tuple[int, int]]
 
 
@@ -119,14 +119,14 @@ class MessagePassing(paddle.nn.Layer):
                 the_size[0] = size[0]
                 the_size[1] = size[1]
             return the_size
-        elif isinstance(edge_index, SparseTensor):
-            if self.flow == 'target_to_source':
-                raise ValueError(
-                    'Flow direction "target_to_source" is invalid for message propagation via `torch_sparse.SparseTensor`. If you really want to make use of a reverse message passing flow, pass in the transposed sparse tensor to the message passing module, e.g., `adj_t.t()`.'
-                    )
-            the_size[0] = edge_index.sparse_size(1)
-            the_size[1] = edge_index.sparse_size(0)
-            return the_size
+        # elif isinstance(edge_index, SparseTensor):
+        #     if self.flow == 'target_to_source':
+        #         raise ValueError(
+        #             'Flow direction "target_to_source" is invalid for message propagation via `torch_sparse.SparseTensor`. If you really want to make use of a reverse message passing flow, pass in the transposed sparse tensor to the message passing module, e.g., `adj_t.t()`.'
+        #             )
+        #     the_size[0] = edge_index.sparse_size(1)
+        #     the_size[1] = edge_index.sparse_size(0)
+        #     return the_size
         raise ValueError(
             '`MessagePassing.propagate` only supports `torch.LongTensor` of shape `[2, num_messages]` or `torch_sparse.SparseTensor` for argument `edge_index`.'
             )
@@ -145,14 +145,14 @@ class MessagePassing(paddle.nn.Layer):
         if isinstance(edge_index, paddle.Tensor):
             index = edge_index[dim]
             return src.index_select(axis=self.node_dim, index=index)
-        elif isinstance(edge_index, SparseTensor):
-            if dim == 1:
-                rowptr = edge_index.storage.rowptr()
-                rowptr = expand_left(rowptr, dim=self.node_dim, dims=src.dim())
-                return gather_csr(src, rowptr)
-            elif dim == 0:
-                col = edge_index.storage.col()
-                return src.index_select(axis=self.node_dim, index=col)
+        # elif isinstance(edge_index, SparseTensor):
+        #     if dim == 1:
+        #         rowptr = edge_index.storage.rowptr()
+        #         rowptr = expand_left(rowptr, dim=self.node_dim, dims=src.dim())
+        #         return gather_csr(src, rowptr)
+        #     elif dim == 0:
+        #         col = edge_index.storage.col()
+        #         return src.index_select(axis=self.node_dim, index=col)
         raise ValueError
 
     def __collect__(self, args, edge_index, size, kwargs):
@@ -179,18 +179,18 @@ class MessagePassing(paddle.nn.Layer):
             out['edge_index_i'] = edge_index[i]
             out['edge_index_j'] = edge_index[j]
             out['ptr'] = None
-        elif isinstance(edge_index, SparseTensor):
-            out['adj_t'] = edge_index
-            out['edge_index'] = None
-            out['edge_index_i'] = edge_index.storage.row()
-            out['edge_index_j'] = edge_index.storage.col()
-            out['ptr'] = edge_index.storage.rowptr()
-            if out.get('edge_weight', None) is None:
-                out['edge_weight'] = edge_index.storage.value()
-            if out.get('edge_attr', None) is None:
-                out['edge_attr'] = edge_index.storage.value()
-            if out.get('edge_type', None) is None:
-                out['edge_type'] = edge_index.storage.value()
+        # elif isinstance(edge_index, SparseTensor):
+        #     out['adj_t'] = edge_index
+        #     out['edge_index'] = None
+        #     out['edge_index_i'] = edge_index.storage.row()
+        #     out['edge_index_j'] = edge_index.storage.col()
+        #     out['ptr'] = edge_index.storage.rowptr()
+        #     if out.get('edge_weight', None) is None:
+        #         out['edge_weight'] = edge_index.storage.value()
+        #     if out.get('edge_attr', None) is None:
+        #         out['edge_attr'] = edge_index.storage.value()
+        #     if out.get('edge_type', None) is None:
+        #         out['edge_type'] = edge_index.storage.value()
         out['index'] = out['edge_index_i']
         out['size'] = size
         out['size_i'] = size[1] if size[1] is not None else size[0]
@@ -234,24 +234,24 @@ class MessagePassing(paddle.nn.Layer):
             if res is not None:
                 edge_index, size, kwargs = res
         size = self.__check_input__(edge_index, size)
-        if isinstance(edge_index, SparseTensor
-            ) and self.fuse and not self._explain:
-            coll_dict = self.__collect__(self.__fused_user_args__,
-                edge_index, size, kwargs)
-            msg_aggr_kwargs = self.inspector.distribute('message_and_aggregate'
-                , coll_dict)
-            for hook in self._message_and_aggregate_forward_pre_hooks.values():
-                res = hook(self, (edge_index, msg_aggr_kwargs))
-                if res is not None:
-                    edge_index, msg_aggr_kwargs = res
-            out = self.message_and_aggregate(edge_index, **msg_aggr_kwargs)
-            for hook in self._message_and_aggregate_forward_hooks.values():
-                res = hook(self, (edge_index, msg_aggr_kwargs), out)
-                if res is not None:
-                    out = res
-            update_kwargs = self.inspector.distribute('update', coll_dict)
-            out = self.update(out, **update_kwargs)
-        elif isinstance(edge_index, paddle.Tensor) or not self.fuse:
+        # if isinstance(edge_index, SparseTensor
+        #     ) and self.fuse and not self._explain:
+        #     coll_dict = self.__collect__(self.__fused_user_args__,
+        #         edge_index, size, kwargs)
+        #     msg_aggr_kwargs = self.inspector.distribute('message_and_aggregate'
+        #         , coll_dict)
+        #     for hook in self._message_and_aggregate_forward_pre_hooks.values():
+        #         res = hook(self, (edge_index, msg_aggr_kwargs))
+        #         if res is not None:
+        #             edge_index, msg_aggr_kwargs = res
+        #     out = self.message_and_aggregate(edge_index, **msg_aggr_kwargs)
+        #     for hook in self._message_and_aggregate_forward_hooks.values():
+        #         res = hook(self, (edge_index, msg_aggr_kwargs), out)
+        #         if res is not None:
+        #             out = res
+        #     update_kwargs = self.inspector.distribute('update', coll_dict)
+        #     out = self.update(out, **update_kwargs)
+        if isinstance(edge_index, paddle.Tensor) or not self.fuse:
             if decomposed_layers > 1:
                 user_args = self.__user_args__
                 decomp_args = {a[:-2] for a in user_args if a[-2:] == '_j'}
@@ -366,7 +366,7 @@ class MessagePassing(paddle.nn.Layer):
             return scatter(inputs, index, dim=self.node_dim, dim_size=
                 dim_size, reduce=self.aggr)
 
-    def message_and_aggregate(self, adj_t: SparseTensor) ->paddle.Tensor:
+    def message_and_aggregate(self, adj_t) ->paddle.Tensor:
         """Fuses computations of :func:`message` and :func:`aggregate` into a
         single function.
         If applicable, this saves both time and memory since messages do not

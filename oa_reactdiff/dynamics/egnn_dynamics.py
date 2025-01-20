@@ -4,7 +4,7 @@ from utils import paddle_aux
 import paddle
 from typing import Dict, List, Optional, Tuple
 import numpy as np
-from torch_scatter import scatter_mean
+# from torch_scatter import scatter_mean
 from oa_reactdiff.model import EGNN
 from oa_reactdiff.utils._graph_tools import get_subgraph_mask
 from ._base import BaseDynamics
@@ -182,90 +182,10 @@ class EGNNDynamics(BaseDynamics):
         ]
         return np.concatenate([np.array([0]), np.cumsum(counts)])
 
-    @paddle.no_grad()
-    def adjust_edge_attr_on_new_eij(
-        self,
-        edge_index: paddle.Tensor,
-        edge_attr: paddle.Tensor,
-        edge_index_new: paddle.Tensor,
-    ) -> paddle.Tensor:
-        """Get ready new edge attributes (e_ij) given old {ij, e_ij} and new {ij}
-
-        Args:
-            edge_index (Tensor): ij
-            edge_attr (Tensor): e_ij
-            edge_index_new (Tensor): new ij
-
-        Raises:
-            ValueError: finding multiple entries for the same ij pair
-
-        Returns:
-            Tensor: new e_ij
-        """
-        edge_index_T = paddle.transpose(
-            x=edge_index, perm=paddle_aux.transpose_aux_func(edge_index.ndim, 1, 0)
-        )
-        edge_index_new_T = paddle.transpose(
-            x=edge_index_new,
-            perm=paddle_aux.transpose_aux_func(edge_index_new.ndim, 1, 0),
-        )
-        edge_attr_new = []
-        for _ind, ij in enumerate(edge_index_new_T):
-            ind = torch.where((ij == edge_index_T).astype("bool").all(axis=1))[0]
-            if ind.shape[0] > 1:
-                raise ValueError(f"ind should only be 0 or 1, getting {ind}")
-            if ind.shape[0] == 0:
-                self.create_new_edge_attr(
-                    ind_new=_ind,
-                    ij_new=ij,
-                    edge_index_new_T=edge_index_new_T,
-                    edge_attr_new=edge_attr_new,
-                    edge_attr=edge_attr,
-                )
-            else:
-                edge_attr_new.append(edge_attr[ind.item()].detach())
-        return paddle.stack(x=edge_attr_new, axis=0)
-
     @staticmethod
     def init_edge_attr(sample_edge_attr):
         """initialize edge attributes."""
         return paddle.rand(shape=sample_edge_attr.shape, dtype=sample_edge_attr.dtype)
-
-    def create_new_edge_attr(
-        self,
-        ind_new: paddle.Tensor,
-        ij_new: paddle.Tensor,
-        edge_index_new_T: paddle.Tensor,
-        edge_attr_new: List[paddle.Tensor],
-        edge_attr: paddle.Tensor,
-    ) -> List[paddle.Tensor]:
-        """Create new edge attrbution for ij that is not present in old connections
-
-        Args:
-            ind_new (Tensor): natural index of new ij
-            ij_new (Tensor): new ij
-            edge_index_new_T (Tensor): new edge indexes, [n_edge, 2]
-            edge_attr_new (List[Tensor]): list of new edge attributes
-            edge_attr (Tensor): old edge attributes
-
-        Raises:
-            ValueError: not ji found for ij in new indexes
-
-        Returns:
-            List[Tensor]: list of new edge attributes
-        """
-        ij_new_reverse = ij_new[paddle.to_tensor(data=[1, 0])]
-        ind_new_reverse = torch.where(
-            (ij_new_reverse == edge_index_new_T).astype("bool").all(axis=1)
-        )[0]
-        print(ind_new_reverse)
-        if ind_new_reverse.shape[0] == 0:
-            raise ValueError(f"should always find a reverse ind.")
-        if ind_new_reverse.item() >= ind_new:
-            edge_attr_new.append(self.init_edge_attr(edge_attr[0]))
-        else:
-            edge_attr_new.append(edge_attr_new[ind_new_reverse.item()])
-        return edge_attr_new
 
     @staticmethod
     def remove_mean_batch(x, indices):

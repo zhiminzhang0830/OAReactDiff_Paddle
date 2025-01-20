@@ -49,14 +49,14 @@ def sanitize(type_repr: str):
 
 def param_type_repr(param) ->str:
     if param.annotation is inspect.Parameter.empty:
-        return 'torch.Tensor'
+        return 'paddle.Tensor'
     return sanitize(re.split(':|='.strip(), str(param))[1])
 
 
 def return_type_repr(signature) ->str:
     return_type = signature.return_annotation
     if return_type is inspect.Parameter.empty:
-        return 'torch.Tensor'
+        return 'paddle.Tensor'
     elif str(return_type)[:6] != '<class':
         return sanitize(str(return_type))
     elif return_type.__module__ == 'builtins':

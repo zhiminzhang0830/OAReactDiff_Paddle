@@ -1,9 +1,10 @@
-OA-ReactDiff
+OA-ReactDiff_Paddle
 ==============================
-[//]: # (Badges)
-[![GitHub Actions Build Status](https://github.com/chenruduan/OAReactDiff/workflows/CI/badge.svg)](https://github.com/chenruduan/OAReactDiff/actions?query=workflow%3ACI)
+
+*This is a PaddlePaddle implementation of OA-ReactDiff. For PyTorch version, please check [OAReactDiff](https://github.com/chenruduan/OAReactDiff).*
 
 ### <ins>O</ins>bject-<ins>a</ins>ware SE(3) GNN for generating chemical <ins>react</ins>ions under <ins>diff</ins>usion model (OA-ReactDiff)
+
 
 *OA-ReactDiff* is the first diffusion-based generative model for generating  **3D chemical reactions**, which not only accelerates the search for 3D transition state in chemical reactions by **a factor of 1000**, but also generates and explores **new and unknown** chemical reactions.
 
@@ -24,17 +25,22 @@ Sounds easy? There is one caveat! Conventional SE(3) won't apply here. Why? Thre
 Since OA-ReactDiff maintains **all symmetries and constraints** in chemical reactions, it does not require any pre-processing (e.g., atom mapping, fragment alignment) and post-processting (e.g., coverting distance matrix to 3D geometry), which sometimes are infeasible in exploring unknown reactions. OA-ReactDiff reduces the transition state search cost **from days in using density functional theory to seconds**. Due to the stochastic nature of DDPM, OA-ReactDiff can generate unintended reactions "beyond design", **complementing the chemical intuition-based reaction exploration** that people have been using for decades.
 
 
-### Want to learn more? 
-Get a deep dive with our notebook tutorial at `OA-ReactDiff.ipynb` after installing the package or start with our docker container.
 
 ### Installation
-1. Clone this repo `git clone git@github.com:chenruduan/OAReactDiff.git` and `cd OAReactDiff`  
-2. Setup a conda environment with the proived yaml file `conda env create -f env.yaml`
-3. Local package installation `conda activate oa_reactdiff && pip install -e .`
-4. Test everything works as expected by `pytest oa_reactdiff/tests/`
+1. install dependencies
+```
+    pip install -r requirements.txt
+```
+2. install [PaddlePaddle](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/install/pip/linux-pip.html)
+``` 
+    # for PaddlePaddle==2.6.2 and cuda==11.6
+    python -m pip install paddlepaddle-gpu==2.6.2.post116 -i https://www.paddlepaddle.org.cn/packages/stable/cu116/
+```
 
-### Docker container
-If you are familiar with containerization and would like to use it in your projects, we prepared docker containers for both cpu-only machine and gpu machine at [DockerHub](https://hub.docker.com/r/chenruduan/oa_reactdiff/tags).
+### Usage
+```
+    python demo.py
+```
 
 
 ### Citation
@@ -66,15 +72,7 @@ If you are familiar with containerization and would like to use it in your proje
 ```
 
 
-### Copyright
-
-Copyright (c) 2023, Chenru Duan
-
 
 ### Acknowledgements
 
-Code development based on
-1. [Computational Molecular Science Python Cookiecutter](https://github.com/molssi/cookiecutter-cms) version 1.1.
-2. [LEFTNet](https://github.com/yuanqidu/LeftNet)
-3. [e3_diffusion_for_molecules](https://github.com/ehoogeboom/e3_diffusion_for_molecules)
-4. [DiffSBDD](https://github.com/arneschneuing/DiffSBDD)
+Code development based on [OAReactDiff](https://github.com/chenruduan/OAReactDiff)
